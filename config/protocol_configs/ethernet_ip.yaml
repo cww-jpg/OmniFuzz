@@ -1,0 +1,96 @@
+# EtherNet/IP 协议配置
+name: "ethernet_ip"
+port: 44818
+description: "EtherNet/IP Industrial Protocol"
+
+# 协议字段定义
+fields:
+  command:
+    position: [0, 2]
+    type: "uint16"
+    description: "命令代码"
+    mutable: true
+    default: 111
+    state_dim: 16
+    action_dim: 6
+    
+  length:
+    position: [2, 4]
+    type: "uint16"
+    description: "数据长度"
+    mutable: true
+    default: 0
+    state_dim: 16
+    action_dim: 6
+    
+  session_handle:
+    position: [4, 8]
+    type: "uint32"
+    description: "会话句柄"
+    mutable: true
+    default: 0
+    state_dim: 32
+    action_dim: 5
+    
+  status:
+    position: [8, 12]
+    type: "uint32"
+    description: "状态代码"
+    mutable: true
+    default: 0
+    state_dim: 32
+    action_dim: 5
+    
+  sender_context:
+    position: [12, 20]
+    type: "bytes"
+    description: "发送方上下文"
+    mutable: true
+    default: "0000000000000000"
+    state_dim: 64
+    action_dim: 6
+    
+  options:
+    position: [20, 24]
+    type: "uint32"
+    description: "选项标志"
+    mutable: true
+    default: 0
+    state_dim: 32
+    action_dim: 4
+    
+  data:
+    position: [24, null]
+    type: "bytes"
+    description: "数据字段"
+    mutable: true
+    default: ""
+    state_dim: 512
+    action_dim: 8
+
+# 变异策略配置
+mutation_strategies:
+  - name: "command_injection"
+    description: "命令注入"
+    enabled: true
+    
+  - name: "session_hijacking"
+    description: "会话劫持"
+    enabled: true
+    
+  - name: "data_corruption"
+    description: "数据损坏"
+    enabled: true
+
+# 测试用例生成配置
+test_generation:
+  seed_messages:
+    - "006f00000000000000000000000000000000000200000000b2000000"  # SendRRData
+  mutation_count: 1000
+  priority_fields: ["command", "length", "data"]
+
+# 智能体训练配置
+training:
+  learning_rate: 0.001
+  batch_size: 32
+  buffer_size: 10000

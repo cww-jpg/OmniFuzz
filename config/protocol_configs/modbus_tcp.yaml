@@ -1,0 +1,70 @@
+# Modbus TCP 协议配置
+name: "modbus_tcp"
+port: 502
+description: "Modbus TCP Industrial Protocol"
+
+fields:
+  transaction_id:
+    position: [0, 2]
+    type: "uint16"
+    description: "事务标识符"
+    mutable: true
+    default: 1
+    
+  protocol_id:
+    position: [2, 4]
+    type: "uint16" 
+    description: "协议标识符"
+    mutable: false
+    default: 0
+    
+  length:
+    position: [4, 6]
+    type: "uint16"
+    description: "后续字节数"
+    mutable: true
+    default: 6
+    
+  unit_id:
+    position: [6, 7]
+    type: "uint8"
+    description: "单元标识符"
+    mutable: true
+    default: 1
+    
+  function_code:
+    position: [7, 8]
+    type: "uint8"
+    description: "功能码"
+    mutable: true
+    default: 3
+    valid_values: [1, 2, 3, 4, 5, 6, 15, 16]
+    
+  data:
+    position: [8, null]
+    type: "bytes"
+    description: "数据字段"
+    mutable: true
+    default: ""
+
+# 变异策略配置
+mutation_strategies:
+  - name: "boundary_values"
+    description: "边界值测试"
+    enabled: true
+    
+  - name: "invalid_function_codes" 
+    description: "无效功能码"
+    enabled: true
+    
+  - name: "length_field_manipulation"
+    description: "长度字段操纵"
+    enabled: true
+
+# 测试用例生成配置
+test_generation:
+  seed_messages:
+    - "00010000000601030000000A"  # 读保持寄存器
+    - "000200000006010600000001"  # 写单个寄存器
+  mutation_count: 1000
+  priority_fields: ["function_code", "length"]

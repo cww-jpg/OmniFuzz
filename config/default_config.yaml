@@ -1,0 +1,56 @@
+# OmniFuzz Configuration
+training:
+  learning_rate: 0.01
+  gamma: 0.95
+  tau: 0.05
+  buffer_size: 10000
+  batch_size: 128
+  num_episodes: 200
+  target_update_frequency: 100
+
+networks:
+  policy_network:
+    hidden_layers: [64, 32]
+    activation: "relu"
+    optimizer: "adam"
+  value_network:
+    hidden_layers: [128, 64]
+    activation: "relu"
+    optimizer: "adam"
+
+fuzzing:
+  max_test_cases: 10000
+  timeout: 3600
+  concurrent_threads: 8
+  mutation_strategies:
+    - field_flipping
+    - field_deletion
+    - field_duplication
+    - field_truncation
+    - field_padding
+    - invalid_flag_injection
+    - fields_reordering
+    - semantic_mutation
+
+rewards:
+  weights:
+    vulnerability: 0.5
+    depth: 0.25
+    diversity: 0.25
+  vulnerability_scores:
+    none: 0
+    general: 1
+    minor: 2
+    major: 3
+    critical: 4
+
+protocols:
+  modbus_tcp:
+    port: 502
+    fields: ["transaction_id", "protocol_id", "length", "unit_id", "function_code", "data"]
+  ethernet_ip:
+    port: 44818
+    fields: ["command", "length", "session_handle", "status", "sender_context", "options", "data"]
+  siemens_s7:
+    port: 102
+    fields: ["rosctr", "reserved", "protocol_data_unit_reference", "parameter_length", "data_length", "data"]
