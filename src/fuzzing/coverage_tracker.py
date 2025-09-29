@@ -4,17 +4,17 @@ from typing import Dict, List, Set, Any
 from collections import defaultdict
 
 class CoverageTracker:
-    """代码覆盖率跟踪器"""
+    """Code Coverage Tracker"""
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         
-        # 覆盖率数据
+        # Coverage data
         self.basic_blocks_covered = set()
         self.functions_covered = set()
         self.execution_paths = set()
         
-        # 统计信息
+        # Statistical information
         self.coverage_stats = {
             'total_basic_blocks': 0,
             'total_functions': 0,
@@ -22,30 +22,30 @@ class CoverageTracker:
             'coverage_over_time': []
         }
         
-        # 路径深度跟踪
+        # Path depth tracking
         self.path_depths = defaultdict(int)
     
     def record_execution(self, basic_blocks: List[str], functions: List[str], 
                         execution_sequence: List[str]) -> Dict[str, Any]:
-        """记录执行信息"""
-        # 记录基本块
+        """Record execution information"""
+        # Record basic blocks
         new_blocks = set(basic_blocks) - self.basic_blocks_covered
         self.basic_blocks_covered.update(basic_blocks)
         
-        # 记录函数
+        # Record functions
         new_functions = set(functions) - self.functions_covered
         self.functions_covered.update(functions)
         
-        # 记录执行路径
+        # Record execution path
         path_hash = self._hash_execution_path(execution_sequence)
         is_new_path = path_hash not in self.execution_paths
         if is_new_path:
             self.execution_paths.add(path_hash)
         
-        # 计算路径深度
+        # Calculate path depth
         path_depth = self._calculate_path_depth(execution_sequence)
         
-        # 更新统计
+        # Update statistics
         coverage_data = self._update_coverage_stats()
         coverage_data.update({
             'new_blocks': len(new_blocks),
@@ -57,22 +57,22 @@ class CoverageTracker:
         return coverage_data
     
     def _hash_execution_path(self, execution_sequence: List[str]) -> str:
-        """哈希执行路径用于去重"""
+        """Hash execution path for deduplication"""
         path_string = '->'.join(execution_sequence)
         return hashlib.md5(path_string.encode()).hexdigest()
     
     def _calculate_path_depth(self, execution_sequence: List[str]) -> int:
-        """计算路径深度"""
-        # 路径深度 = 执行序列中的基本块数量
+        """Calculate path depth"""
+        # Path depth = number of basic blocks in execution sequence
         depth = len(execution_sequence)
         
-        # 记录路径深度分布
+        # Record path depth distribution
         self.path_depths[depth] += 1
         
         return depth
     
     def _update_coverage_stats(self) -> Dict[str, Any]:
-        """更新覆盖率统计"""
+        """Update coverage statistics"""
         basic_block_coverage = len(self.basic_blocks_covered) / max(1, self.coverage_stats['total_basic_blocks'])
         function_coverage = len(self.functions_covered) / max(1, self.coverage_stats['total_functions'])
         path_coverage = len(self.execution_paths)
@@ -86,15 +86,15 @@ class CoverageTracker:
             'unique_functions': len(self.functions_covered)
         }
         
-        # 记录覆盖率随时间变化
+        # Record coverage changes over time
         self.coverage_stats['coverage_over_time'].append(coverage_data)
         
         return coverage_data
     
     def get_coverage_summary(self) -> Dict[str, Any]:
-        """获取覆盖率摘要"""
+        """Get coverage summary"""
         if self.coverage_stats['total_basic_blocks'] == 0:
-            return {'error': '未设置总基本块数量'}
+            return {'error': 'Total basic block count not set'}
         
         return {
             'basic_block_coverage': {
@@ -115,7 +115,7 @@ class CoverageTracker:
         }
     
     def _calculate_coverage_trend(self) -> str:
-        """计算覆盖率趋势"""
+        """Calculate coverage trend"""
         if len(self.coverage_stats['coverage_over_time']) < 2:
             return "unknown"
         
@@ -123,7 +123,7 @@ class CoverageTracker:
         if len(recent_coverage) < 2:
             return "stable"
         
-        # 分析基本块覆盖率趋势
+        # Analyze basic block coverage trend
         coverage_values = [data['basic_block_coverage'] for data in recent_coverage]
         first_half = coverage_values[:len(coverage_values)//2]
         second_half = coverage_values[len(coverage_values)//2:]
@@ -139,12 +139,12 @@ class CoverageTracker:
             return "stable"
     
     def set_total_counts(self, total_basic_blocks: int, total_functions: int):
-        """设置总基本块和函数数量"""
+        """Set total counts for basic blocks and functions"""
         self.coverage_stats['total_basic_blocks'] = total_basic_blocks
         self.coverage_stats['total_functions'] = total_functions
     
     def reset_coverage(self):
-        """重置覆盖率数据"""
+        """Reset coverage data"""
         self.basic_blocks_covered.clear()
         self.functions_covered.clear()
         self.execution_paths.clear()
@@ -152,7 +152,7 @@ class CoverageTracker:
         self.path_depths.clear()
 
 class LLVMCoverageTracker(CoverageTracker):
-    """基于LLVM的覆盖率跟踪器"""
+    """LLVM-based Coverage Tracker"""
     
     def __init__(self, llvm_tool_path: str = ""):
         super().__init__()
@@ -160,22 +160,22 @@ class LLVMCoverageTracker(CoverageTracker):
         self.instrumented_binaries = set()
     
     def instrument_binary(self, binary_path: str, output_path: str) -> bool:
-        """使用LLVM插桩二进制文件"""
+        """Instrument binary file using LLVM"""
         try:
-            # 这里应该调用LLVM工具进行实际插桩
-            # 简化实现
-            self.logger.info(f"插桩二进制文件: {binary_path} -> {output_path}")
+            # Actual LLVM instrumentation tools should be called here
+            # Simplified implementation
+            self.logger.info(f"Instrumenting binary: {binary_path} -> {output_path}")
             self.instrumented_binaries.add(output_path)
             return True
         except Exception as e:
-            self.logger.error(f"二进制插桩失败: {e}")
+            self.logger.error(f"Binary instrumentation failed: {e}")
             return False
     
     def parse_coverage_data(self, coverage_file: str) -> Dict[str, Any]:
-        """解析LLVM覆盖率数据"""
+        """Parse LLVM coverage data"""
         try:
-            # 这里应该解析实际的LLVM覆盖率文件
-            # 简化实现 - 返回模拟数据
+            # Actual LLVM coverage files should be parsed here
+            # Simplified implementation - returning mock data
             return {
                 'basic_blocks': ['bb1', 'bb2', 'bb3'],
                 'functions': ['func1', 'func2'],
@@ -183,5 +183,6 @@ class LLVMCoverageTracker(CoverageTracker):
                 'file_path': coverage_file
             }
         except Exception as e:
-            self.logger.error(f"解析覆盖率数据失败: {e}")
+            self.logger.error(f"Failed to parse coverage data: {e}")
             return {}
+    

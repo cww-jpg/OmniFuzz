@@ -26,7 +26,7 @@ class TestMutationEngine(unittest.TestCase):
         self.mutation_engine = MutationEngine(self.protocol_config)
 
     def test_mutation_actions(self):
-        """测试变异操作"""
+        """Test mutation operations"""
         original_message = b'\x01\x02\x03\x04\x05'
         mutation_actions = {
             'function_code': 0,  # FIELD_FLIPPING
@@ -41,16 +41,16 @@ class TestMutationEngine(unittest.TestCase):
         self.assertNotEqual(mutated_message, original_message)
 
     def test_specific_mutations(self):
-        """测试特定变异操作"""
+        """Test specific mutation operations"""
         test_message = b'\x01\x02\x03'
         
-        # 测试字段翻转
+        # Test field flipping
         flipped = self.mutation_engine._flip_field(bytearray(test_message), 'function_code')
         self.assertNotEqual(bytes(flipped), test_message)
         
-        # 测试字段删除
+        # Test field deletion
         deleted = self.mutation_engine._delete_field(bytearray(test_message), 'data')
-        self.assertEqual(deleted[1:], b'\x00\x00')  # 删除的字段应该被置零
+        self.assertEqual(deleted[1:], b'\x00\x00')  # deleted field should be zeroed
 
 class TestTestCaseGenerator(unittest.TestCase):
 
@@ -65,7 +65,7 @@ class TestTestCaseGenerator(unittest.TestCase):
         self.test_generator = TestCaseGenerator(self.protocol_configs)
 
     def test_test_case_generation(self):
-        """测试测试用例生成"""
+        """Test test-case generation"""
         test_cases = self.test_generator.generate_test_cases(
             protocol='modbus_tcp',
             count=10,
@@ -82,7 +82,7 @@ class TestTestCaseGenerator(unittest.TestCase):
             self.assertEqual(test_case['priority'], TestCasePriority.HIGH)
 
     def test_seed_statistics(self):
-        """测试种子统计"""
+        """Test seed statistics"""
         stats = self.test_generator.get_seed_statistics()
         
         self.assertIn('modbus_tcp', stats)
@@ -94,7 +94,7 @@ class TestCoverageTracker(unittest.TestCase):
         self.coverage_tracker = CoverageTracker()
 
     def test_coverage_recording(self):
-        """测试覆盖率记录"""
+        """Test coverage recording"""
         basic_blocks = ['bb1', 'bb2', 'bb3']
         functions = ['func1', 'func2']
         execution_sequence = ['bb1', 'bb2', 'bb1', 'bb3']
@@ -108,11 +108,11 @@ class TestCoverageTracker(unittest.TestCase):
         self.assertIn('path_depth', coverage_data)
 
     def test_coverage_summary(self):
-        """测试覆盖率摘要"""
-        # 设置总数量
+        """Test coverage summary"""
+        # Set totals
         self.coverage_tracker.set_total_counts(100, 50)
         
-        # 记录一些覆盖率数据
+        # Record coverage data
         self.coverage_tracker.record_execution(
             ['bb1', 'bb2'], ['func1'], ['bb1', 'bb2']
         )

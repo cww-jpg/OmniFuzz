@@ -3,35 +3,35 @@ from typing import Dict, List, Any
 import numpy as np
 
 class RewardCalculator:
-    """多目标奖励函数计算器"""
+    """Multi-objective Reward Function Calculator"""
     
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.vulnerability_weights = config['rewards']['vulnerability_scores']
         self.reward_weights = config['rewards']['weights']
         
-        # 记录已发现的漏洞类型用于多样性计算
+        # Track discovered vulnerability types for diversity calculation
         self.discovered_vulnerabilities = set()
         
     def calculate_reward(self, fuzzing_results: Dict[str, Any]) -> float:
-        """计算综合奖励值"""
+        """Calculate comprehensive reward value"""
         
-        # 漏洞发现数量奖励
+        # Vulnerability discovery reward
         vuln_reward = self._calculate_vulnerability_reward(
             fuzzing_results['vulnerabilities']
         )
         
-        # 深度路径探索奖励
+        # Deep path exploration reward
         depth_reward = self._calculate_depth_reward(
             fuzzing_results['execution_depth']
         )
         
-        # 漏洞多样性奖励
+        # Vulnerability diversity reward
         diversity_reward = self._calculate_diversity_reward(
             fuzzing_results['vulnerability_types']
         )
         
-        # 综合奖励（公式10）
+        # Comprehensive reward (Equation 10)
         total_reward = (
             self.reward_weights['vulnerability'] * vuln_reward +
             self.reward_weights['depth'] * depth_reward +
@@ -41,14 +41,14 @@ class RewardCalculator:
         return total_reward
     
     def _calculate_vulnerability_reward(self, vulnerabilities: List[Dict]) -> float:
-        """计算漏洞发现数量奖励（公式6-7）"""
+        """Calculate vulnerability discovery reward (Equations 6-7)"""
         total_score = 0
         
         for vuln in vulnerabilities:
             severity = vuln.get('severity', 'none')
             score = self.vulnerability_weights.get(severity, 0)
             
-            # 根据论文，高危漏洞有3倍权重
+            # According to the paper, high-risk vulnerabilities have 3x weight
             if severity == 'critical':
                 score *= 3
             elif severity == 'major':
@@ -59,25 +59,25 @@ class RewardCalculator:
         return total_score
     
     def _calculate_depth_reward(self, execution_depth: Dict[str, float]) -> float:
-        """计算深度路径探索奖励（公式8）"""
+        """Calculate deep path exploration reward (Equation 8)"""
         if not execution_depth:
             return 0
             
-        # 计算所有智能体的平均路径深度
+        # Calculate average path depth for all agents
         total_depth = sum(execution_depth.values())
         avg_depth = total_depth / len(execution_depth)
         
         return avg_depth
     
     def _calculate_diversity_reward(self, vulnerability_types: List[str]) -> float:
-        """计算漏洞多样性奖励（公式9）"""
-        # 更新已发现的漏洞类型
+        """Calculate vulnerability diversity reward (Equation 9)"""
+        # Update discovered vulnerability types
         for vuln_type in vulnerability_types:
             self.discovered_vulnerabilities.add(vuln_type)
             
-        # 返回唯一漏洞类型数量
+        # Return the number of unique vulnerability types
         return len(self.discovered_vulnerabilities)
     
     def reset_diversity_tracking(self):
-        """重置多样性跟踪（用于新的训练周期）"""
+        """Reset diversity tracking (for new training episodes)"""
         self.discovered_vulnerabilities.clear()

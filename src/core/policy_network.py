@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class PolicyNetwork(nn.Module):
-    """多层感知机策略网络"""
+    """MLP policy network"""
     
     def __init__(self, input_dim: int, hidden_dims: List[int], output_dim: int):
         super(PolicyNetwork, self).__init__()
@@ -11,7 +11,7 @@ class PolicyNetwork(nn.Module):
         layers = []
         prev_dim = input_dim
         
-        # 构建隐藏层
+        # Build hidden layers
         for hidden_dim in hidden_dims:
             layers.extend([
                 nn.Linear(prev_dim, hidden_dim),
@@ -20,7 +20,7 @@ class PolicyNetwork(nn.Module):
             ])
             prev_dim = hidden_dim
             
-        # 输出层
+        # Output layer
         layers.append(nn.Linear(prev_dim, output_dim))
         layers.append(nn.Softmax(dim=-1))
         
@@ -30,17 +30,17 @@ class PolicyNetwork(nn.Module):
         return self.network(x)
     
     def get_action_probabilities(self, state: torch.Tensor) -> torch.Tensor:
-        """获取动作概率分布"""
+        """Get action probability distribution"""
         return self.forward(state)
 
 class PolicyNetworkMLP(nn.Module):
-    """论文中描述的三层感知机策略网络"""
+    """Three-layer MLP policy network as described in the paper"""
     
     def __init__(self, input_dim: int, hidden1_dim: int = 64, 
                  hidden2_dim: int = 32, output_dim: int = 8):
         super(PolicyNetworkMLP, self).__init__()
         
-        # 根据论文中的公式(11)-(14)
+        # According to equations (11)-(14) in the paper
         self.W1 = nn.Linear(input_dim, hidden1_dim)
         self.b1 = nn.Parameter(torch.randn(hidden1_dim))
         self.W2 = nn.Linear(hidden1_dim, hidden2_dim)

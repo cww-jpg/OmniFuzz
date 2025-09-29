@@ -1,5 +1,5 @@
 """
-测试模块 - 单元测试和集成测试
+Test module - Unit tests and integration tests
 
-包含所有测试用例和测试工具
+Contains all test cases and testing utilities
 """

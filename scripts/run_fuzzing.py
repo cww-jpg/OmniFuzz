@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-OmniFuzz 模糊测试运行脚本
-使用训练好的模型进行多协议并发模糊测试
+OmniFuzz fuzzing runner script
+Run concurrent multi-protocol fuzzing with trained models
 """
 
 import torch
@@ -20,7 +20,7 @@ from src.fuzzing.coverage_tracker import CoverageTracker
 from src.utils.monitoring import ResourceMonitor
 
 def setup_logging():
-    """设置日志配置"""
+    """Configure logging"""
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -31,14 +31,14 @@ def setup_logging():
     )
 
 def load_config(config_path: str) -> Dict[str, Any]:
-    """加载配置文件"""
+    """Load configuration file"""
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     return config
 
 def load_trained_models(models_dir: str, protocols: List[str], 
                        config: Dict[str, Any], device: torch.device) -> Dict[str, AgentArray]:
-    """加载训练好的模型"""
+    """Load trained models"""
     agent_arrays = {}
     models_path = Path(models_dir)
     
@@ -46,10 +46,10 @@ def load_trained_models(models_dir: str, protocols: List[str],
         protocol_path = models_path / protocol
         
         if not protocol_path.exists():
-            logging.warning(f"协议 {protocol} 的模型目录不存在: {protocol_path}")
+            logging.warning(f"Model directory for protocol {protocol} does not exist: {protocol_path}")
             continue
             
-        # 创建共享价值网络
+        # Create shared value network
         state_dim = config['protocols'][protocol].get('state_dim', 1000)
         action_dim = config['protocols'][protocol].get('action_dim', 8)
         shared_value_network = ValueNetwork(
@@ -57,12 +57,12 @@ def load_trained_models(models_dir: str, protocols: List[str],
             action_dim=action_dim
         ).to(device)
         
-        # 加载价值网络
+        # Load value network
         value_net_path = protocol_path / "value_network.pth"
         if value_net_path.exists():
             shared_value_network.load_state_dict(torch.load(value_net_path))
         
-        # 创建智能体数组
+        # Create agent array
         protocol_config = config['protocols'][protocol]
         agent_array = AgentArray(
             protocol_name=protocol,
@@ -71,97 +71,97 @@ def load_trained_models(models_dir: str, protocols: List[str],
             device=device
         )
         
-        # 加载每个智能体的策略网络
+        # Load each agent's policy network
         for agent in agent_array.agents:
             model_path = protocol_path / f"agent_{agent.field_name}.pth"
             if model_path.exists():
                 agent.policy_network.load_state_dict(torch.load(model_path))
             else:
-                logging.warning(f"智能体 {agent.field_name} 的模型文件不存在: {model_path}")
+                logging.warning(f"Model file for agent {agent.field_name} does not exist: {model_path}")
         
         agent_arrays[protocol] = agent_array
-        logging.info(f"加载协议 {protocol} 的模型完成，包含 {len(agent_array.agents)} 个智能体")
+        logging.info(f"Loaded models for protocol {protocol} with {len(agent_array.agents)} agents")
     
     return agent_arrays
 
 def main():
-    parser = argparse.ArgumentParser(description='OmniFuzz 模糊测试运行脚本')
+    parser = argparse.ArgumentParser(description='OmniFuzz fuzzing runner')
     parser.add_argument('--models_dir', type=str, default='models/',
-                       help='训练好的模型目录')
+                       help='Directory of trained models')
     parser.add_argument('--config', type=str, default='config/default_config.yaml',
-                       help='配置文件路径')
+                       help='Path to configuration file')
     parser.add_argument('--protocols', nargs='+', 
                        default=['modbus_tcp', 'ethernet_ip', 'siemens_s7'],
-                       help='要测试的协议列表')
+                       help='List of protocols to test')
     parser.add_argument('--duration', type=int, default=3600,
-                       help='测试持续时间（秒）')
+                       help='Test duration (seconds)')
     parser.add_argument('--output_dir', type=str, default='fuzzing_results/',
-                       help='结果输出目录')
+                       help='Output directory')
     parser.add_argument('--device', type=str, default='cuda',
-                       help='运行设备 (cuda/cpu)')
+                       help='Device (cuda/cpu)')
     
     args = parser.parse_args()
     
-    # 设置日志
+    # Configure logging
     setup_logging()
     logger = logging.getLogger(__name__)
     
-    # 加载配置
+    # Load config
     config = load_config(args.config)
-    logger.info(f"加载配置文件: {args.config}")
+    logger.info(f"Loaded config file: {args.config}")
     
-    # 设置设备
+    # Select device
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
-    logger.info(f"使用设备: {device}")
+    logger.info(f"Using device: {device}")
     
-    # 创建输出目录
+    # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
     try:
-        # 启动资源监控
+        # Start resource monitoring
         resource_monitor = ResourceMonitor(interval=5.0)
         resource_monitor.start_monitoring()
         
-        # 加载训练好的模型
-        logger.info("加载训练好的模型...")
+        # Load trained models
+        logger.info("Loading trained models...")
         agent_arrays = load_trained_models(
             args.models_dir, args.protocols, config, device
         )
         
         if not agent_arrays:
-            logger.error("没有加载到任何模型，请检查模型目录")
+            logger.error("No models loaded. Please check the model directory")
             return
         
-        # 创建环境
+        # Create environment
         environment = PowerIoTEnvironment(
             protocols=args.protocols,
             config=config
         )
         
-        # 创建覆盖率跟踪器
+        # Create coverage tracker
         coverage_tracker = CoverageTracker()
         
-        # 创建变异引擎
+        # Create mutation engines
         mutation_engines = {}
         for protocol in args.protocols:
             protocol_config = config['protocols'][protocol]
             mutation_engines[protocol] = MutationEngine(protocol_config)
         
-        logger.info(f"开始模糊测试，持续时间: {args.duration}秒")
+        logger.info(f"Start fuzzing, duration: {args.duration} seconds")
         start_time = time.time()
         
-        # 模糊测试主循环
+        # Main fuzzing loop
         test_cases_sent = 0
         vulnerabilities_found = []
         protocol_stats = {protocol: {'messages_sent': 0, 'crashes': 0} 
                          for protocol in args.protocols}
         
         while time.time() - start_time < args.duration:
-            # 重置环境
+            # Reset environment
             observations = environment.reset()
             
-            # 运行测试周期
+            # Run one fuzzing episode
             episode_vulnerabilities = run_fuzzing_episode(
                 agent_arrays, environment, mutation_engines, 
                 observations, coverage_tracker, config
@@ -170,53 +170,53 @@ def main():
             vulnerabilities_found.extend(episode_vulnerabilities)
             test_cases_sent += sum(stats['messages_sent'] for stats in protocol_stats.values())
             
-            # 记录进度
+            # Log progress
             elapsed = time.time() - start_time
-            if int(elapsed) % 60 == 0:  # 每分钟记录一次
+            if int(elapsed) % 60 == 0:  # once per minute
                 logger.info(
-                    f"进度: {elapsed:.0f}/{args.duration}秒 | "
-                    f"测试用例: {test_cases_sent} | "
-                    f"漏洞发现: {len(vulnerabilities_found)}"
+                    f"Progress: {elapsed:.0f}/{args.duration}s | "
+                    f"Test cases: {test_cases_sent} | "
+                    f"Vulnerabilities: {len(vulnerabilities_found)}"
                 )
         
-        # 停止资源监控
+        # Stop resource monitoring
         resource_monitor.stop_monitoring()
         
-        # 生成测试报告
+        # Generate report
         generate_fuzzing_report(
             output_dir, vulnerabilities_found, protocol_stats,
             coverage_tracker, resource_monitor, args.duration
         )
         
-        logger.info(f"模糊测试完成! 结果保存在: {args.output_dir}")
+        logger.info(f"Fuzzing completed! Results saved to: {args.output_dir}")
         
     except Exception as e:
-        logger.error(f"模糊测试过程中发生错误: {e}")
+        logger.error(f"Error during fuzzing: {e}")
         raise
 
 def run_fuzzing_episode(agent_arrays, environment, mutation_engines, 
                        observations, coverage_tracker, config) -> List[Dict]:
-    """运行一个模糊测试周期"""
+    """Run one fuzzing episode"""
     vulnerabilities = []
     step_count = 0
     max_steps = config.get('fuzzing', {}).get('max_steps_per_episode', 100)
     
     while step_count < max_steps:
-        # 智能体选择动作
+        # Agents select actions
         actions = {}
         for protocol, agent_array in agent_arrays.items():
             if protocol in observations:
                 protocol_actions = agent_array.select_actions(observations[protocol])
                 actions[protocol] = protocol_actions
         
-        # 执行环境步骤
+        # Step environment
         next_observations, reward, done, info = environment.step(actions)
         
-        # 记录漏洞
+        # Record vulnerabilities
         if 'vulnerabilities_found' in info:
             vulnerabilities.extend(info['vulnerabilities_found'])
         
-        # 记录覆盖率
+        # Record coverage
         if 'coverage_data' in info:
             coverage_tracker.record_execution(
                 basic_blocks=info['coverage_data'].get('basic_blocks', []),
@@ -235,9 +235,9 @@ def run_fuzzing_episode(agent_arrays, environment, mutation_engines,
 def generate_fuzzing_report(output_dir: Path, vulnerabilities: List[Dict], 
                           protocol_stats: Dict, coverage_tracker: CoverageTracker,
                           resource_monitor: ResourceMonitor, duration: int):
-    """生成模糊测试报告"""
+    """Generate fuzzing report"""
     
-    # 漏洞统计
+    # Vulnerability statistics
     vulnerability_stats = {}
     for vuln in vulnerabilities:
         vuln_type = vuln.get('type', 'unknown')
@@ -250,56 +250,56 @@ def generate_fuzzing_report(output_dir: Path, vulnerabilities: List[Dict],
         vulnerability_stats[vuln_type]['severities'][severity] = \
             vulnerability_stats[vuln_type]['severities'].get(severity, 0) + 1
     
-    # 生成报告
+    # Build report
     report = [
-        "OmniFuzz 模糊测试报告",
+        "OmniFuzz Fuzzing Report",
         "=" * 50,
-        f"测试持续时间: {duration} 秒",
-        f"开始时间: {time.strftime('%Y-%m-%d %H:%M:%S')}",
-        f"总测试用例: {sum(stats['messages_sent'] for stats in protocol_stats.values())}",
-        f"总漏洞发现: {len(vulnerabilities)}",
+        f"Test duration: {duration} seconds",
+        f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S')}",
+        f"Total test cases: {sum(stats['messages_sent'] for stats in protocol_stats.values())}",
+        f"Total vulnerabilities: {len(vulnerabilities)}",
         "",
-        "协议统计:"
+        "Protocol statistics:"
     ]
     
     for protocol, stats in protocol_stats.items():
         crash_rate = stats['crashes'] / max(1, stats['messages_sent']) * 100
         report.append(
-            f"  {protocol}: {stats['messages_sent']} 消息, "
-            f"{stats['crashes']} 崩溃 ({crash_rate:.2f}%)"
+            f"  {protocol}: {stats['messages_sent']} messages, "
+            f"{stats['crashes']} crashes ({crash_rate:.2f}%)"
         )
     
-    report.append("\n漏洞统计:")
+    report.append("\nVulnerability statistics:")
     for vuln_type, stats in vulnerability_stats.items():
-        report.append(f"  {vuln_type}: {stats['count']} 个")
+        report.append(f"  {vuln_type}: {stats['count']}")
         for severity, count in stats['severities'].items():
-            report.append(f"    {severity}: {count} 个")
+            report.append(f"    {severity}: {count}")
     
-    # 覆盖率报告
+    # Coverage report
     coverage_summary = coverage_tracker.get_coverage_summary()
     if 'error' not in coverage_summary:
         report.extend([
             "",
-            "代码覆盖率:",
-            f"  基本块覆盖率: {coverage_summary['basic_block_coverage']['percentage']:.2f}%",
-            f"  函数覆盖率: {coverage_summary['function_coverage']['percentage']:.2f}%",
-            f"  唯一路径: {coverage_summary['path_coverage']['unique_paths']} 个"
+            "Code coverage:",
+            f"  Basic block coverage: {coverage_summary['basic_block_coverage']['percentage']:.2f}%",
+            f"  Function coverage: {coverage_summary['function_coverage']['percentage']:.2f}%",
+            f"  Unique paths: {coverage_summary['path_coverage']['unique_paths']}"
         ])
     
-    # 资源使用报告
+    # Resource usage report
     resource_report = resource_monitor.generate_report()
-    report.extend(["", "资源使用:", resource_report])
+    report.extend(["", "Resource usage:", resource_report])
     
-    # 保存报告
+    # Save report
     report_path = output_dir / "fuzzing_report.txt"
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(report))
     
-    # 保存漏洞详情
+    # Save vulnerability details
     if vulnerabilities:
         vuln_details = []
         for i, vuln in enumerate(vulnerabilities, 1):
-            vuln_details.append(f"漏洞 #{i}:")
+            vuln_details.append(f"Vulnerability #{i}:")
             for key, value in vuln.items():
                 vuln_details.append(f"  {key}: {value}")
             vuln_details.append("")
@@ -308,7 +308,7 @@ def generate_fuzzing_report(output_dir: Path, vulnerabilities: List[Dict],
         with open(vuln_path, 'w', encoding='utf-8') as f:
             f.write('\n'.join(vuln_details))
     
-    logging.info(f"测试报告已生成: {report_path}")
+    logging.info(f"Report generated: {report_path}")
 
 if __name__ == "__main__":
     main()

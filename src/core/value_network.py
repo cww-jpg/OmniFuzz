@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ValueNetwork(nn.Module):
-    """共享价值网络"""
+    """Shared value network"""
     
     def __init__(self, state_dim: int, action_dim: int, 
                  hidden_dims: List[int] = [128, 64]):
@@ -16,7 +16,7 @@ class ValueNetwork(nn.Module):
         layers = []
         prev_dim = input_dim
         
-        # 构建隐藏层
+        # Build hidden layers
         for hidden_dim in hidden_dims:
             layers.extend([
                 nn.Linear(prev_dim, hidden_dim),
@@ -25,24 +25,24 @@ class ValueNetwork(nn.Module):
             ])
             prev_dim = hidden_dim
             
-        # 输出层 - 为每个智能体输出价值分数
+        # Output layer - value score
         layers.append(nn.Linear(prev_dim, 1))
         
         self.network = nn.Sequential(*layers)
         
     def forward(self, state: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
-        # 合并状态和动作
+        # Concatenate state and actions
         x = torch.cat([state, actions], dim=-1)
         return self.network(x)
 
 class ValueNetworkMLP(nn.Module):
-    """论文中描述的多层感知机价值网络"""
+    """MLP value network as described in the paper"""
     
     def __init__(self, input_dim: int, hidden1_dim: int = 64, 
                  hidden2_dim: int = 32, output_dim: int = 1):
         super(ValueNetworkMLP, self).__init__()
         
-        # 根据论文中的描述扩展输入维度
+        # Expand input dimensions per paper description
         self.W1 = nn.Linear(input_dim, hidden1_dim)
         self.b1 = nn.Parameter(torch.randn(hidden1_dim))
         self.W2 = nn.Linear(hidden1_dim, hidden2_dim)
@@ -51,7 +51,7 @@ class ValueNetworkMLP(nn.Module):
         self.b3 = nn.Parameter(torch.randn(output_dim))
         
     def forward(self, global_obs: torch.Tensor, global_actions: torch.Tensor) -> torch.Tensor:
-        # 合并全局观察和动作
+        # Concatenate global observation and actions
         x = torch.cat([global_obs, global_actions], dim=-1)
         
         # H^(1) = ReLU(XW_1 + b_1)

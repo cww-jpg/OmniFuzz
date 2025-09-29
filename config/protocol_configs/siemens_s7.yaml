@@ -1,14 +1,14 @@
-# Siemens S7 协议配置
+# Siemens S7 protocol configuration
 name: "siemens_s7"
 port: 102
 description: "Siemens S7 Industrial Protocol"
 
-# 协议字段定义
+# Protocol field definitions
 fields:
   rosctr:
     position: [0, 1]
     type: "uint8"
-    description: "ROSCTR 类型"
+    description: "ROSCTR type"
     mutable: true
     default: 1
     state_dim: 8
@@ -17,7 +17,7 @@ fields:
   reserved:
     position: [1, 2]
     type: "uint8"
-    description: "保留字段"
+    description: "Reserved field"
     mutable: false
     default: 0
     state_dim: 8
@@ -26,7 +26,7 @@ fields:
   protocol_data_unit_reference:
     position: [2, 4]
     type: "uint16"
-    description: "PDU 引用"
+    description: "PDU reference"
     mutable: true
     default: 0
     state_dim: 16
@@ -35,7 +35,7 @@ fields:
   parameter_length:
     position: [4, 6]
     type: "uint16"
-    description: "参数长度"
+    description: "Parameter length"
     mutable: true
     default: 0
     state_dim: 16
@@ -44,7 +44,7 @@ fields:
   data_length:
     position: [6, 8]
     type: "uint16"
-    description: "数据长度"
+    description: "Data length"
     mutable: true
     default: 0
     state_dim: 16
@@ -53,34 +53,34 @@ fields:
   data:
     position: [8, null]
     type: "bytes"
-    description: "数据字段"
+    description: "Data field"
     mutable: true
     default: ""
     state_dim: 512
     action_dim: 8
 
-# 变异策略配置
+# Mutation strategy configuration
 mutation_strategies:
   - name: "pdu_manipulation"
-    description: "PDU 操纵"
+    description: "PDU manipulation"
     enabled: true
     
   - name: "length_exploitation"
-    description: "长度利用"
+    description: "Length exploitation"
     enabled: true
     
   - name: "data_integrity"
-    description: "数据完整性破坏"
+    description: "Data integrity violation"
     enabled: true
 
-# 测试用例生成配置
+# Test case generation configuration
 test_generation:
   seed_messages:
-    - "1100010000000000"  # 连接请求
+    - "1100010000000000"  # Connection request
   mutation_count: 1000
   priority_fields: ["rosctr", "parameter_length", "data_length"]
 
-# 智能体训练配置
+# Agent training configuration
 training:
   learning_rate: 0.001
   batch_size: 32

@@ -1,7 +1,7 @@
 """
-环境模块 - 电力物联网环境和协议处理
+Environment module - power IoT environment and protocol handling
 
-包含环境、协议解析器、设备接口等组件
+Includes environment, protocol parser, device interface components
 """
 
 from .power_iot_env import PowerIoTEnvironment

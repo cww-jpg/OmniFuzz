@@ -17,18 +17,18 @@ class TestPolicyNetwork(unittest.TestCase):
         self.policy_net = PolicyNetwork(self.input_dim, self.hidden_dims, self.output_dim)
 
     def test_forward_pass(self):
-        """测试前向传播"""
+        """Test forward pass"""
         batch_size = 4
         input_tensor = torch.randn(batch_size, self.input_dim)
         
         output = self.policy_net(input_tensor)
         
         self.assertEqual(output.shape, (batch_size, self.output_dim))
-        # 检查输出是概率分布（和为1）
+        # Check output is a probability distribution (sums to 1)
         self.assertTrue(torch.allclose(output.sum(dim=1), torch.ones(batch_size), atol=1e-6))
 
     def test_action_probabilities(self):
-        """测试动作概率计算"""
+        """Test action probability calculation"""
         state = torch.randn(1, self.input_dim)
         action_probs = self.policy_net.get_action_probabilities(state)
         
@@ -47,7 +47,7 @@ class TestPolicyNetworkMLP(unittest.TestCase):
         )
 
     def test_forward_pass(self):
-        """测试MLP前向传播"""
+        """Test MLP forward pass"""
         batch_size = 128
         input_tensor = torch.randn(batch_size, self.input_dim)
         
@@ -64,7 +64,7 @@ class TestValueNetwork(unittest.TestCase):
         self.value_net = ValueNetwork(self.state_dim, self.action_dim)
 
     def test_forward_pass(self):
-        """测试价值网络前向传播"""
+        """Test value network forward pass"""
         batch_size = 4
         state = torch.randn(batch_size, self.state_dim)
         actions = torch.randn(batch_size, self.action_dim)
@@ -76,7 +76,7 @@ class TestValueNetwork(unittest.TestCase):
 class TestValueNetworkMLP(unittest.TestCase):
 
     def setUp(self):
-        self.input_dim = 100  # 状态维度 + 动作维度
+        self.input_dim = 100  # state dim + action dim
         self.value_net = ValueNetworkMLP(
             input_dim=self.input_dim,
             hidden1_dim=64,
@@ -85,10 +85,10 @@ class TestValueNetworkMLP(unittest.TestCase):
         )
 
     def test_forward_pass(self):
-        """测试MLP价值网络前向传播"""
+        """Test MLP value network forward pass"""
         batch_size = 128
-        global_obs = torch.randn(batch_size, 50)  # 50维状态
-        global_actions = torch.randn(batch_size, 50)  # 50维动作
+        global_obs = torch.randn(batch_size, 50)  # 50-dim state
+        global_actions = torch.randn(batch_size, 50)  # 50-dim action
         
         value = self.value_net(global_obs, global_actions)
         

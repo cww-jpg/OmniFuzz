@@ -1,7 +1,7 @@
 """
-工具模块 - 数据处理和监控工具
+Utilities module - data processing and monitoring tools
 
-包含数据预处理器、协议工具、监控工具等组件
+Includes data preprocessor, protocol utilities, monitoring utilities
 """
 
 from .data_preprocessor import DataPreprocessor

@@ -3,19 +3,19 @@ from typing import Dict, List, Any, Tuple
 import logging
 
 class ProtocolParser:
-    """工业协议解析器"""
+    """Industrial Protocol Parser"""
     
     def __init__(self, protocol_type: str, config: Dict[str, Any]):
         self.protocol_type = protocol_type
         self.config = config
         self.logger = logging.getLogger(__name__)
         
-        # 协议特定配置
+        # Protocol-specific configuration
         self.protocol_config = config['protocols'].get(protocol_type, {})
         self.field_definitions = self.protocol_config.get('fields', {})
         
     def parse_message(self, message: bytes) -> Dict[str, Any]:
-        """解析协议消息"""
+        """Parse protocol message"""
         try:
             if self.protocol_type == 'modbus_tcp':
                 return self._parse_modbus_tcp(message)
@@ -26,12 +26,12 @@ class ProtocolParser:
             else:
                 return self._parse_generic(message)
         except Exception as e:
-            self.logger.error(f"解析{self.protocol_type}消息时出错: {e}")
+            self.logger.error(f"Error parsing {self.protocol_type} message: {e}")
             return {'raw': message, 'error': str(e)}
     
     def mutate_message(self, original_message: bytes, 
                       field_actions: Dict[str, int]) -> bytes:
-        """根据智能体动作变异消息"""
+        """Mutate message based on agent actions"""
         parsed_message = self.parse_message(original_message)
         mutated_fields = {}
         
@@ -43,13 +43,13 @@ class ProtocolParser:
                 )
                 mutated_fields[field_name] = mutated_value
         
-        # 重建变异后的消息
+        # Rebuild mutated message
         return self._rebuild_message(parsed_message, mutated_fields)
     
     def _parse_modbus_tcp(self, message: bytes) -> Dict[str, Any]:
-        """解析Modbus TCP消息"""
+        """Parse Modbus TCP message"""
         if len(message) < 8:
-            return {'error': '消息过短'}
+            return {'error': 'Message too short'}
             
         return {
             'transaction_id': struct.unpack('>H', message[0:2])[0],
@@ -61,9 +61,9 @@ class ProtocolParser:
         }
     
     def _parse_ethernet_ip(self, message: bytes) -> Dict[str, Any]:
-        """解析EtherNet/IP消息"""
+        """Parse EtherNet/IP message"""
         if len(message) < 24:
-            return {'error': '消息过短'}
+            return {'error': 'Message too short'}
             
         return {
             'command': struct.unpack('>H', message[0:2])[0],
@@ -76,9 +76,9 @@ class ProtocolParser:
         }
     
     def _parse_siemens_s7(self, message: bytes) -> Dict[str, Any]:
-        """解析Siemens S7消息"""
+        """Parse Siemens S7 message"""
         if len(message) < 12:
-            return {'error': '消息过短'}
+            return {'error': 'Message too short'}
             
         return {
             'rosctr': message[0],
@@ -90,7 +90,7 @@ class ProtocolParser:
         }
     
     def _parse_generic(self, message: bytes) -> Dict[str, Any]:
-        """通用解析方法"""
+        """Generic parsing method"""
         return {
             'length': len(message),
             'raw': message,
@@ -98,7 +98,7 @@ class ProtocolParser:
         }
     
     def _get_mutation_action(self, action_idx: int) -> str:
-        """根据动作索引获取变异操作"""
+        """Get mutation operation based on action index"""
         actions = [
             'flip', 'delete', 'duplicate', 'truncate', 
             'pad', 'invalid_flag', 'reorder', 'semantic'
@@ -106,7 +106,7 @@ class ProtocolParser:
         return actions[action_idx % len(actions)]
     
     def _apply_mutation(self, original_value: Any, action: str, field_name: str) -> Any:
-        """应用变异操作"""
+        """Apply mutation operation"""
         if action == 'flip':
             return self._flip_value(original_value)
         elif action == 'delete':
@@ -127,7 +127,7 @@ class ProtocolParser:
             return original_value
     
     def _flip_value(self, value: Any) -> Any:
-        """翻转值"""
+        """Flip value bits"""
         if isinstance(value, (bytes, bytearray)):
             return bytes(b ^ 0xFF for b in value)
         elif isinstance(value, int):
@@ -136,7 +136,7 @@ class ProtocolParser:
             return value
     
     def _delete_value(self, value: Any, field_name: str) -> Any:
-        """删除值（设置为零或空）"""
+        """Delete value (set to zero or empty)"""
         field_config = self.field_definitions.get(field_name, {})
         default_value = field_config.get('default', 0)
         
@@ -146,7 +146,7 @@ class ProtocolParser:
             return default_value
     
     def _duplicate_value(self, value: Any) -> Any:
-        """复制值"""
+        """Duplicate value"""
         if isinstance(value, (bytes, bytearray)):
             return value * 2
         elif isinstance(value, (int, float)):
@@ -155,22 +155,22 @@ class ProtocolParser:
             return value
     
     def _truncate_value(self, value: Any) -> Any:
-        """截断值"""
+        """Truncate value"""
         if isinstance(value, (bytes, bytearray)):
             return value[:max(1, len(value) // 2)]
         else:
             return value
     
     def _pad_value(self, value: Any) -> Any:
-        """填充值"""
+        """Pad value with additional data"""
         if isinstance(value, (bytes, bytearray)):
-            padding = bytes([0xFF] * 10)  # 填充10个0xFF字节
+            padding = bytes([0xFF] * 10)  # Pad with 10 0xFF bytes
             return value + padding
         else:
             return value
     
     def _inject_invalid_flag(self, value: Any, field_name: str) -> Any:
-        """注入无效标志"""
+        """Inject invalid flag value"""
         field_config = self.field_definitions.get(field_name, {})
         
         if field_config.get('is_flag', False):
@@ -182,7 +182,7 @@ class ProtocolParser:
         return value
     
     def _reorder_value(self, value: Any) -> Any:
-        """重新排序值"""
+        """Reorder value components"""
         if isinstance(value, (bytes, bytearray)):
             value_list = list(value)
             import random
@@ -192,11 +192,11 @@ class ProtocolParser:
             return value
     
     def _semantic_mutation(self, value: Any, field_name: str) -> Any:
-        """语义变异"""
+        """Apply semantic mutation"""
         field_config = self.field_definitions.get(field_name, {})
         
         if field_config.get('is_numeric', False) and isinstance(value, int):
-            # 边界值测试
+            # Boundary value testing
             boundary_values = [0, -1, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF]
             import random
             return random.choice(boundary_values)
@@ -205,12 +205,12 @@ class ProtocolParser:
     
     def _rebuild_message(self, original_parsed: Dict[str, Any], 
                         mutated_fields: Dict[str, Any]) -> bytes:
-        """重建变异后的消息"""
-        # 合并原始字段和变异字段
+        """Rebuild mutated message"""
+        # Merge original and mutated fields
         merged_fields = original_parsed.copy()
         merged_fields.update(mutated_fields)
         
-        # 根据协议类型重建消息
+        # Rebuild message based on protocol type
         if self.protocol_type == 'modbus_tcp':
             return self._rebuild_modbus_tcp(merged_fields)
         elif self.protocol_type == 'ethernet_ip':
@@ -221,7 +221,7 @@ class ProtocolParser:
             return merged_fields.get('raw', b'')
     
     def _rebuild_modbus_tcp(self, fields: Dict[str, Any]) -> bytes:
-        """重建Modbus TCP消息"""
+        """Rebuild Modbus TCP message"""
         message = b''
         message += struct.pack('>H', fields.get('transaction_id', 0))
         message += struct.pack('>H', fields.get('protocol_id', 0))
@@ -232,7 +232,7 @@ class ProtocolParser:
         return message
     
     def _rebuild_ethernet_ip(self, fields: Dict[str, Any]) -> bytes:
-        """重建EtherNet/IP消息"""
+        """Rebuild EtherNet/IP message"""
         message = b''
         message += struct.pack('>H', fields.get('command', 0))
         message += struct.pack('>H', fields.get('length', 0))
@@ -244,7 +244,7 @@ class ProtocolParser:
         return message
     
     def _rebuild_siemens_s7(self, fields: Dict[str, Any]) -> bytes:
-        """重建Siemens S7消息"""
+        """Rebuild Siemens S7 message"""
         message = b''
         message += bytes([fields.get('rosctr', 0)])
         message += bytes([fields.get('reserved', 0)])
@@ -253,3 +253,4 @@ class ProtocolParser:
         message += struct.pack('>H', fields.get('data_length', 0))
         message += fields.get('data', b'')
         return message
+    

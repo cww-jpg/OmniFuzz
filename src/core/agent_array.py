@@ -6,7 +6,7 @@ from .policy_network import PolicyNetwork
 from .value_network import ValueNetwork
 
 class AgentArray:
-    """协议专用的智能体数组"""
+    """Protocol-specific agent array"""
     
     def __init__(self, protocol_name: str, field_config: Dict[str, Any], 
                  shared_value_network: ValueNetwork, device: torch.device):
@@ -15,14 +15,14 @@ class AgentArray:
         self.shared_value_network = shared_value_network
         self.device = device
         
-        # 为每个协议字段创建专用智能体
+        # Create a dedicated agent for each protocol field
         self.agents = self._initialize_agents()
         
     def _initialize_agents(self) -> List[ProtocolAgent]:
-        """初始化协议字段智能体"""
+        """Initialize protocol-field agents"""
         agents = []
         for field_name, field_config in self.field_config.items():
-            # 为每个字段创建独立的策略网络
+            # Create a separate policy network for each field
             policy_net = PolicyNetwork(
                 input_dim=field_config['state_dim'],
                 hidden_dims=[64, 32],
@@ -40,7 +40,7 @@ class AgentArray:
         return agents
     
     def select_actions(self, observations: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
-        """为所有智能体选择动作"""
+        """Select actions for all agents"""
         actions = {}
         for agent in self.agents:
             obs = observations[agent.field_name]
@@ -50,7 +50,7 @@ class AgentArray:
         return actions
     
     def update_policies(self, experiences: List[Dict], global_reward: float):
-        """更新所有智能体的策略"""
+        """Update policies for all agents"""
         for agent in self.agents:
             field_experiences = [
                 exp for exp in experiences 
@@ -60,7 +60,7 @@ class AgentArray:
                 agent.update_policy(field_experiences, global_reward)
     
     def get_global_observation(self, individual_observations: Dict[str, torch.Tensor]) -> torch.Tensor:
-        """合并所有智能体的观察为全局观察"""
+        """Combine all agent observations into a global observation"""
         obs_list = []
         for agent in self.agents:
             if agent.field_name in individual_observations:

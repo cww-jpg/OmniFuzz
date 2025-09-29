@@ -4,26 +4,26 @@ from typing import Dict, List, Any, Tuple
 import numpy as np
 
 class MetricsCalculator:
-    """性能指标计算器"""
+    """Performance metrics calculator"""
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.metrics_history = []
 
     def evaluate_omnifuzz(self, models_dir: str, protocols: List[str], duration: int) -> Dict[str, Any]:
-        """评估OmniFuzz性能"""
-        self.logger.info(f"评估OmniFuzz，协议: {protocols}，持续时间: {duration}秒")
+        """Evaluate OmniFuzz performance"""
+        self.logger.info(f"Evaluating OmniFuzz, protocols: {protocols}, duration: {duration}s")
 
-        # 模拟评估过程
+        # Simulate evaluation process
         start_time = time.time()
-        time_to_first_attack = np.random.uniform(100, 300)  # 模拟首次攻击时间
+        time_to_first_attack = np.random.uniform(100, 300)  # simulated time to first attack
         effective_recognition_rate = np.random.uniform(0.7, 0.85)
         dropped_cases_ratio = np.random.uniform(0.05, 0.1)
         critical_vulnerabilities = np.random.randint(3, 8)
         total_vulnerabilities = np.random.randint(15, 25)
         code_coverage = np.random.uniform(0.6, 0.8)
 
-        # 模拟协议特定指标
+        # Simulate protocol-specific metrics
         protocol_metrics = {}
         for protocol in protocols:
             protocol_metrics[protocol] = {
@@ -48,14 +48,14 @@ class MetricsCalculator:
 
     def calculate_statistical_significance(self, baseline_metrics: Dict[str, Any], 
                                          omnifuzz_metrics: Dict[str, Any]) -> Dict[str, float]:
-        """计算统计显著性"""
+        """Calculate statistical significance"""
         significance = {}
 
         for key in baseline_metrics:
             if key in omnifuzz_metrics and isinstance(baseline_metrics[key], (int, float)):
-                # 使用模拟的t检验值
-                t_value = np.random.uniform(2.0, 5.0)  # 模拟t值
-                p_value = np.random.uniform(0.001, 0.05)  # 模拟p值
+                # Use simulated t-test values
+                t_value = np.random.uniform(2.0, 5.0)  # simulated t value
+                p_value = np.random.uniform(0.001, 0.05)  # simulated p value
                 significance[key] = {
                     't_value': t_value,
                     'p_value': p_value,
@@ -65,30 +65,30 @@ class MetricsCalculator:
         return significance
 
     def generate_performance_report(self, metrics: Dict[str, Any]) -> str:
-        """生成性能报告"""
+        """Generate performance report"""
         report = [
-            "OmniFuzz 性能评估报告",
+            "OmniFuzz Performance Evaluation Report",
             "=" * 50,
-            f"首次攻击时间: {metrics['time_to_first_attack']:.2f} 秒",
-            f"有效识别率: {metrics['effective_recognition_rate']:.2%}",
-            f"丢弃用例比例: {metrics['dropped_cases_ratio']:.2%}",
-            f"关键漏洞数量: {metrics['critical_vulnerabilities']}",
-            f"总漏洞数量: {metrics['total_vulnerabilities']}",
-            f"代码覆盖率: {metrics['code_coverage']:.2%}",
+            f"Time to first attack: {metrics['time_to_first_attack']:.2f} s",
+            f"Effective recognition rate: {metrics['effective_recognition_rate']:.2%}",
+            f"Dropped cases ratio: {metrics['dropped_cases_ratio']:.2%}",
+            f"Critical vulnerabilities: {metrics['critical_vulnerabilities']}",
+            f"Total vulnerabilities: {metrics['total_vulnerabilities']}",
+            f"Code coverage: {metrics['code_coverage']:.2%}",
             "",
-            "协议特定指标:"
+            "Protocol-specific metrics:"
         ]
 
         for protocol, proto_metrics in metrics['protocol_metrics'].items():
             report.append(f"  {protocol}:")
-            report.append(f"    覆盖率: {proto_metrics['coverage']:.2%}")
-            report.append(f"    漏洞数量: {proto_metrics['vulnerabilities']}")
-            report.append(f"    异常率: {proto_metrics['exception_rate']:.2%}")
+            report.append(f"    Coverage: {proto_metrics['coverage']:.2%}")
+            report.append(f"    Vulnerabilities: {proto_metrics['vulnerabilities']}")
+            report.append(f"    Exception rate: {proto_metrics['exception_rate']:.2%}")
 
         return "\n".join(report)
 
     def get_metrics_trend(self) -> Dict[str, Any]:
-        """获取指标趋势"""
+        """Get metrics trend"""
         if len(self.metrics_history) < 2:
             return {'trend': 'insufficient_data'}
 

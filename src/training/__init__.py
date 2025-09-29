@@ -1,7 +1,7 @@
 """
-训练模块 - 多智能体训练和协调
+Training module - multi-agent training and coordination
 
-包含训练器、奖励计算器、多智能体协调器等组件
+Includes trainer, reward calculator, multi-agent coordinator
 """
 
 from .trainer import OmniFuzzTrainer

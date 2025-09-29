@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-工业协议数据收集脚本
-用于从真实设备捕获协议通信数据
+Industrial protocol data collection script
+Used to capture protocol communication data from real devices
 """
 
 import argparse
@@ -14,52 +14,52 @@ from src.utils.data_preprocessor import DataPreprocessor
 from src.environment.protocol_parser import ProtocolParser
 
 def setup_logging():
-    """设置日志"""
+    """Configure logging"""
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
 
 def collect_modbus_data(output_dir: Path, duration: int):
-    """收集Modbus TCP数据"""
+    """Collect Modbus TCP data"""
     logger = logging.getLogger(__name__)
-    logger.info(f"开始收集Modbus TCP数据，持续时间: {duration}秒")
+    logger.info(f"Start collecting Modbus TCP data, duration: {duration} seconds")
     
-    # 这里应该是实际的Modbus数据收集代码
-    # 使用pymodbus或其他库与设备通信
-    time.sleep(1)  # 模拟数据收集
+    # Actual Modbus data collection code should be implemented here
+    # Use pymodbus or other libraries to communicate with devices
+    time.sleep(1)  # simulate data collection
     
-    logger.info("Modbus TCP数据收集完成")
+    logger.info("Modbus TCP data collection completed")
 
 def collect_ethernet_ip_data(output_dir: Path, duration: int):
-    """收集EtherNet/IP数据"""
+    """Collect EtherNet/IP data"""
     logger = logging.getLogger(__name__)
-    logger.info(f"开始收集EtherNet/IP数据，持续时间: {duration}秒")
+    logger.info(f"Start collecting EtherNet/IP data, duration: {duration} seconds")
     
-    # 这里应该是实际的EtherNet/IP数据收集代码
-    time.sleep(1)  # 模拟数据收集
+    # Actual EtherNet/IP data collection code should be implemented here
+    time.sleep(1)  # simulate data collection
     
-    logger.info("EtherNet/IP数据收集完成")
+    logger.info("EtherNet/IP data collection completed")
 
 def collect_siemens_s7_data(output_dir: Path, duration: int):
-    """收集Siemens S7数据"""
+    """Collect Siemens S7 data"""
     logger = logging.getLogger(__name__)
-    logger.info(f"开始收集Siemens S7数据，持续时间: {duration}秒")
+    logger.info(f"Start collecting Siemens S7 data, duration: {duration} seconds")
     
-    # 这里应该是实际的S7数据收集代码
-    time.sleep(1)  # 模拟数据收集
+    # Actual S7 data collection code should be implemented here
+    time.sleep(1)  # simulate data collection
     
-    logger.info("Siemens S7数据收集完成")
+    logger.info("Siemens S7 data collection completed")
 
 def main():
-    parser = argparse.ArgumentParser(description='工业协议数据收集')
+    parser = argparse.ArgumentParser(description='Industrial protocol data collection')
     parser.add_argument('--output', type=str, default='data/raw',
-                       help='输出目录')
+                       help='Output directory')
     parser.add_argument('--protocols', nargs='+', 
                        default=['modbus_tcp', 'ethernet_ip', 'siemens_s7'],
-                       help='要收集的协议列表')
+                       help='List of protocols to collect')
     parser.add_argument('--duration', type=int, default=300,
-                       help='每个协议的收集持续时间（秒）')
+                       help='Collection duration per protocol (seconds)')
     
     args = parser.parse_args()
     
@@ -78,12 +78,12 @@ def main():
             elif protocol == 'siemens_s7':
                 collect_siemens_s7_data(output_dir, args.duration)
             else:
-                logger.warning(f"不支持的协议: {protocol}")
+                logger.warning(f"Unsupported protocol: {protocol}")
         
-        logger.info("所有协议数据收集完成")
+        logger.info("All protocol data collection completed")
         
     except Exception as e:
-        logger.error(f"数据收集过程中发生错误: {e}")
+        logger.error(f"Error during data collection: {e}")
         raise
 
 if __name__ == "__main__":

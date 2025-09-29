@@ -1,7 +1,7 @@
 """
-评估模块 - 性能评估和基线比较
+Evaluation module - performance evaluation and baseline comparison
 
-包含指标计算器、基线比较器、漏洞分析器等组件
+Includes metrics calculator, baseline comparator, vulnerability analyzer
 """
 
 from .metrics_calculator import MetricsCalculator

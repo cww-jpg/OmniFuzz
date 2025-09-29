@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import DBSCAN
 
 class DataPreprocessor:
-    """工业协议数据预处理器"""
+    """Industrial Protocol Data Preprocessor"""
     
     def __init__(self):
         self.scaler = StandardScaler()
@@ -14,15 +14,15 @@ class DataPreprocessor:
         
     def preprocess_protocol_data(self, raw_packets: List[bytes], 
                                protocol_type: str) -> Dict[str, Any]:
-        """预处理协议数据"""
+        """Preprocess protocol data"""
         
-        # 1. 协议数据聚类和样本扩展
+        # 1. Protocol data clustering and sample expansion
         clustered_data = self._cluster_packets_by_length(raw_packets)
         
-        # 2. 数据格式转换和编码标准化
+        # 2. Data format conversion and encoding standardization
         normalized_data = self._normalize_encoding(clustered_data)
         
-        # 3. 数据归一化
+        # 3. Data normalization
         preprocessed_data = self._normalize_data(normalized_data)
         
         return {
@@ -33,7 +33,7 @@ class DataPreprocessor:
         }
     
     def _cluster_packets_by_length(self, packets: List[bytes]) -> Dict[int, List[bytes]]:
-        """基于数据包长度进行聚类"""
+        """Cluster packets by length"""
         length_groups = {}
         
         for packet in packets:
@@ -45,20 +45,20 @@ class DataPreprocessor:
         return length_groups
     
     def _normalize_encoding(self, clustered_data: Dict[int, List[bytes]]) -> List[np.ndarray]:
-        """标准化编码格式（转换为8位八进制序列）"""
+        """Standardize encoding format (convert to 8-bit binary sequences)"""
         normalized_packets = []
         
         for length_group in clustered_data.values():
             for packet in length_group:
-                # 转换为二进制流，然后转换为8位八进制序列
+                # Convert to binary stream, then to 8-bit binary sequences
                 binary_stream = ''.join(format(byte, '08b') for byte in packet)
                 
-                # 转换为8维one-hot向量（简化实现）
+                # Convert to 8-dimensional one-hot vectors (simplified implementation)
                 one_hot_vectors = []
                 for byte in packet:
-                    # 每个字符编码为8维one-hot向量
+                    # Encode each character as 8-dimensional one-hot vector
                     one_hot = np.zeros(8)
-                    one_hot[byte % 8] = 1  # 简化实现
+                    one_hot[byte % 8] = 1  # Simplified implementation
                     one_hot_vectors.append(one_hot)
                     
                 normalized_packets.append(np.array(one_hot_vectors).flatten())
@@ -66,17 +66,17 @@ class DataPreprocessor:
         return normalized_packets
     
     def _normalize_data(self, normalized_data: List[np.ndarray]) -> np.ndarray:
-        """数据归一化"""
+        """Data normalization"""
         if not normalized_data:
             return np.array([])
             
-        # 找到最大长度进行填充
+        # Find maximum length for padding
         max_length = max(len(vec) for vec in normalized_data)
         padded_data = []
         
         for vec in normalized_data:
             if len(vec) < max_length:
-                # 使用字节重复和随机填充的混合方法
+                # Use mixed approach of byte repetition and random padding
                 padding_length = max_length - len(vec)
                 padding = np.random.choice([0, 1], size=padding_length)
                 padded_vec = np.concatenate([vec, padding])
@@ -88,11 +88,11 @@ class DataPreprocessor:
         return np.array(padded_data)
     
     def _extract_features(self, preprocessed_data: np.ndarray) -> np.ndarray:
-        """提取特征向量"""
+        """Extract feature vectors"""
         if preprocessed_data.size == 0:
             return np.array([])
             
-        # 使用标准化器
+        # Use standardizer
         if hasattr(self.scaler, 'n_samples_seen_') and self.scaler.n_samples_seen_ > 0:
             features = self.scaler.transform(preprocessed_data)
         else:
@@ -101,8 +101,8 @@ class DataPreprocessor:
         return features
     
     def apply_smote_augmentation(self, data: np.ndarray, labels: np.ndarray) -> tuple:
-        """应用SMOTE过采样技术增强少数类数据"""
-        # 这里简化实现，实际应使用imbalanced-learn库
+        """Apply SMOTE oversampling technique to enhance minority class data"""
+        # Simplified implementation, actual implementation should use imbalanced-learn library
         unique_labels, counts = np.unique(labels, return_counts=True)
         max_count = np.max(counts)
         
@@ -111,13 +111,13 @@ class DataPreprocessor:
         
         for label, count in zip(unique_labels, counts):
             if count < max_count:
-                # 复制少数类样本以达到平衡
+                # Duplicate minority class samples to achieve balance
                 minority_indices = np.where(labels == label)[0]
                 replication_factor = max_count // count
                 
                 for _ in range(replication_factor - 1):
                     replicated_data = data[minority_indices].copy()
-                    # 添加少量噪声
+                    # Add small amount of noise
                     noise = np.random.normal(0, 0.01, replicated_data.shape)
                     replicated_data += noise
                     

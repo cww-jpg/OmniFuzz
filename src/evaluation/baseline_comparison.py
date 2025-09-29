@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 class BaselineComparator:
-    """基线方法比较器"""
+    """Baseline methods comparator"""
 
     def __init__(self, baseline_methods: List[str]):
         self.baseline_methods = baseline_methods
@@ -13,10 +13,10 @@ class BaselineComparator:
         self.comparison_data = {}
 
     def evaluate_baseline(self, baseline_name: str, protocols: List[str], duration: int) -> Dict[str, Any]:
-        """评估基线方法"""
-        self.logger.info(f"评估基线方法: {baseline_name}")
+        """Evaluate a baseline method"""
+        self.logger.info(f"Evaluating baseline: {baseline_name}")
 
-        # 模拟基线方法的性能指标
+        # Simulate baseline performance metrics
         metrics = {
             'time_to_first_attack': self._simulate_metric(baseline_name, 'time_to_first_attack', 200, 600),
             'effective_recognition_rate': self._simulate_metric(baseline_name, 'effective_recognition_rate', 0.3, 0.7),
@@ -30,8 +30,8 @@ class BaselineComparator:
         return metrics
 
     def _simulate_metric(self, baseline_name: str, metric_name: str, min_val: float, max_val: float) -> float:
-        """模拟基线方法的指标值"""
-        # 根据基线方法和指标名称生成模拟数据
+        """Simulate a metric value for a baseline"""
+        # Generate simulated data based on baseline and metric name
         baseline_performance = {
             'Sulley': {'time_to_first_attack': 500, 'effective_recognition_rate': 0.4, 
                       'dropped_cases_ratio': 0.15, 'critical_vulnerabilities': 1, 
@@ -65,13 +65,13 @@ class BaselineComparator:
             return np.random.uniform(min_val, max_val)
 
     def generate_comparison_report(self, results: Dict[str, Any]) -> str:
-        """生成比较报告"""
+        """Generate comparison report"""
         report = [
-            "OmniFuzz 与基线方法比较报告",
+            "OmniFuzz vs. Baselines Comparison Report",
             "=" * 60
         ]
 
-        # 创建比较表格
+        # Create comparison table
         metrics = ['time_to_first_attack', 'effective_recognition_rate', 'dropped_cases_ratio', 
                   'critical_vulnerabilities', 'total_vulnerabilities', 'code_coverage']
         methods = ['OmniFuzz'] + self.baseline_methods
@@ -93,14 +93,14 @@ class BaselineComparator:
                         row.append('N/A')
                 table_data.append(row)
 
-        # 生成Markdown表格
+        # Generate Markdown table
         headers = ['Method'] + [m.replace('_', ' ').title() for m in metrics]
         report.append(self._format_markdown_table(headers, table_data))
 
-        # 添加性能提升总结
+        # Add performance improvement summary
         if 'OmniFuzz' in results:
             omnifuzz_metrics = results['OmniFuzz']
-            report.append("\n性能提升总结 (与最佳基线相比):")
+            report.append("\nImprovement summary (vs. best baseline):")
             report.append("-" * 50)
 
             for metric in metrics:
@@ -124,7 +124,7 @@ class BaselineComparator:
         return "\n".join(report)
 
     def _format_markdown_table(self, headers: List[str], data: List[List[str]]) -> str:
-        """格式化为Markdown表格"""
+        """Format as Markdown table"""
         table = ["| " + " | ".join(headers) + " |"]
         table.append("|" + "|".join(["---"] * len(headers)) + "|")
 
@@ -134,17 +134,17 @@ class BaselineComparator:
         return "\n".join(table)
 
     def generate_performance_charts(self, results: Dict[str, Any], output_dir: str):
-        """生成性能比较图表"""
+        """Generate performance comparison charts"""
         try:
-            # 设置图表风格
+            # Set chart style
             sns.set_style("whitegrid")
-            plt.rcParams['font.sans-serif'] = ['SimHei']  # 支持中文
+            # Note: ensure chosen fonts support required characters
             plt.rcParams['axes.unicode_minus'] = False
 
-            # 创建比较图表
+            # Create comparison charts
             metrics = ['time_to_first_attack', 'effective_recognition_rate', 
                       'critical_vulnerabilities', 'code_coverage']
-            titles = ['首次攻击时间 (秒)', '有效识别率', '关键漏洞数量', '代码覆盖率']
+            titles = ['Time to first attack (s)', 'Effective recognition rate', 'Critical vulnerabilities', 'Code coverage']
 
             fig, axes = plt.subplots(2, 2, figsize=(15, 12))
             axes = axes.ravel()
@@ -158,12 +158,12 @@ class BaselineComparator:
                         methods.append(method)
                         values.append(result[metric])
 
-                # 绘制柱状图
+                # Draw bar chart
                 bars = axes[i].bar(methods, values, color=sns.color_palette("husl", len(methods)))
                 axes[i].set_title(title, fontsize=14, fontweight='bold')
                 axes[i].set_ylabel(metric.replace('_', ' ').title())
 
-                # 在柱子上标注数值
+                # Annotate values on bars
                 for bar, value in zip(bars, values):
                     if 'rate' in metric or 'coverage' in metric:
                         height = bar.get_height()
@@ -178,7 +178,7 @@ class BaselineComparator:
                         axes[i].text(bar.get_x() + bar.get_width()/2., height + 0.1,
                                     f'{value}', ha='center', va='bottom')
 
-                # 旋转x轴标签
+                # Rotate x-axis labels
                 plt.sca(axes[i])
                 plt.xticks(rotation=45)
 
@@ -186,7 +186,7 @@ class BaselineComparator:
             plt.savefig(f"{output_dir}/performance_comparison.png", dpi=300, bbox_inches='tight')
             plt.close()
 
-            self.logger.info(f"性能图表已保存到: {output_dir}/performance_comparison.png")
+            self.logger.info(f"Performance chart saved to: {output_dir}/performance_comparison.png")
 
         except Exception as e:
-            self.logger.error(f"生成图表时出错: {e}")
+            self.logger.error(f"Error generating charts: {e}")

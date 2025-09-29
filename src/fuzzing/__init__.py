@@ -1,7 +1,7 @@
 """
-模糊测试模块 - 变异引擎和测试用例生成
+Fuzzing module - mutation engine and test case generation
 
-包含变异引擎、测试用例生成器、覆盖率跟踪等组件
+Includes mutation engine, test case generator, coverage tracking
 """
 
 from .mutation_engine import MutationEngine, MutationAction

@@ -1,56 +1,56 @@
-# OmniFuzz 依赖包列表
-# 基于多智能体强化学习的电力物联网设备协议感知模糊测试框架
+# OmniFuzz Dependencies List
+# Multi-Agent Reinforcement Learning Based Power IoT Device Protocol-Aware Fuzzing Framework
 
-# 深度学习框架
+# Deep Learning Framework
 torch>=1.9.0
 torchvision>=0.10.0
 torchaudio>=0.9.0
 
-# 强化学习
+# Reinforcement Learning
 gym>=0.21.0
 stable-baselines3>=1.5.0
 
-# 工业协议支持
+# Industrial Protocol Support
 pymodbus>=3.0.0
 pyshark>=0.5.0
 scapy>=2.4.5
 
-# 数据处理和科学计算
+# Data Processing and Scientific Computing
 numpy>=1.21.0
 pandas>=1.3.0
 scikit-learn>=1.0.0
 
-# 可视化和分析
+# Visualization and Analysis
 matplotlib>=3.5.0
 seaborn>=0.11.0
 plotly>=5.0.0
 
-# 配置和日志
+# Configuration and Logging
 pyyaml>=6.0
 tqdm>=4.62.0
 
-# 网络和系统监控
+# Network and System Monitoring
 psutil>=5.8.0
 netaddr>=0.8.0
 python-nmap>=0.7.1
 
-# 测试框架
+# Testing Framework
 pytest>=6.2.0
 pytest-cov>=2.12.0
 
-# 代码质量
+# Code Quality
 black>=21.0.0
 flake8>=3.9.0
 mypy>=0.910
 
-# 文档生成
+# Documentation Generation
 sphinx>=4.0.0
 sphinx-rtd-theme>=0.5.0
 
-# 性能分析
+# Performance Analysis
 tensorboard>=2.8.0
 wandb>=0.12.0
 
-# 其他工具
+# Other Tools
 click>=8.0.0
 rich>=10.0.0

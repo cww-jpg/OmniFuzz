@@ -3,7 +3,7 @@ import torch
 import sys
 import os
 
-# 添加src目录到Python路径
+# Add src directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from core.agent_array import AgentArray
@@ -13,7 +13,7 @@ from core.value_network import ValueNetwork
 class TestAgentArray(unittest.TestCase):
 
     def setUp(self):
-        """测试设置"""
+        """Test setup"""
         self.protocol_name = 'modbus_tcp'
         self.field_config = {
             'function_code': {'state_dim': 10, 'action_dim': 5, 'mutation_actions': ['flip', 'delete']},
@@ -32,7 +32,7 @@ class TestAgentArray(unittest.TestCase):
         )
 
     def test_agent_initialization(self):
-        """测试智能体初始化"""
+        """Test agent initialization"""
         self.assertEqual(self.agent_array.protocol_name, self.protocol_name)
         self.assertEqual(len(self.agent_array.agents), 2)
         
@@ -42,7 +42,7 @@ class TestAgentArray(unittest.TestCase):
         self.assertIn('data', field_names)
 
     def test_action_selection(self):
-        """测试动作选择"""
+        """Test action selection"""
         observations = {
             'function_code': torch.randn(10),
             'data': torch.randn(20)
@@ -56,7 +56,7 @@ class TestAgentArray(unittest.TestCase):
         self.assertIsInstance(actions['data'], torch.Tensor)
 
     def test_global_observation(self):
-        """测试全局观察"""
+        """Test global observation"""
         individual_observations = {
             'function_code': torch.randn(10),
             'data': torch.randn(20)
@@ -76,7 +76,7 @@ class TestPolicyNetwork(unittest.TestCase):
         self.policy_net = PolicyNetwork(self.input_dim, self.hidden_dims, self.output_dim)
 
     def test_forward_pass(self):
-        """测试前向传播"""
+        """Test forward pass"""
         batch_size = 4
         input_tensor = torch.randn(batch_size, self.input_dim)
         

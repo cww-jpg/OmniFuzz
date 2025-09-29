@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-OmniFuzz 主训练脚本
-基于多智能体强化学习的电力物联网设备协议感知模糊测试框架
+OmniFuzz main training script
+Protocol-aware fuzzing framework for power IoT devices based on multi-agent reinforcement learning
 """
 
 import torch
@@ -18,7 +18,7 @@ from src.training.trainer import OmniFuzzTrainer
 from src.utils.data_preprocessor import DataPreprocessor
 
 def setup_logging():
-    """设置日志配置"""
+    """Configure logging"""
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -29,51 +29,51 @@ def setup_logging():
     )
 
 def load_config(config_path: str) -> Dict[str, Any]:
-    """加载配置文件"""
+    """Load configuration file"""
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     return config
 
 def main():
-    parser = argparse.ArgumentParser(description='OmniFuzz 训练脚本')
+    parser = argparse.ArgumentParser(description='OmniFuzz training script')
     parser.add_argument('--config', type=str, default='config/default_config.yaml',
-                       help='配置文件路径')
+                       help='Path to configuration file')
     parser.add_argument('--protocols', nargs='+', 
                        default=['modbus_tcp', 'ethernet_ip', 'siemens_s7'],
-                       help='要测试的协议列表')
+                       help='List of protocols to train')
     parser.add_argument('--episodes', type=int, default=200,
-                       help='训练周期数')
+                       help='Number of training episodes')
     parser.add_argument('--device', type=str, default='cuda',
-                       help='训练设备 (cuda/cpu)')
+                       help='Training device (cuda/cpu)')
     
     args = parser.parse_args()
     
-    # 设置日志
+    # Configure logging
     setup_logging()
     logger = logging.getLogger(__name__)
     
-    # 加载配置
+    # Load config
     config = load_config(args.config)
-    logger.info(f"加载配置文件: {args.config}")
+    logger.info(f"Loaded config file: {args.config}")
     
-    # 设置设备
+    # Select device
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
-    logger.info(f"使用设备: {device}")
+    logger.info(f"Using device: {device}")
     
     try:
-        # 初始化组件
-        logger.info("初始化OmniFuzz组件...")
+        # Initialize components
+        logger.info("Initializing OmniFuzz components...")
         
-        # 数据预处理
+        # Data preprocessing
         preprocessor = DataPreprocessor()
         
-        # 创建环境
+        # Create environment
         environment = PowerIoTEnvironment(
             protocols=args.protocols,
             config=config
         )
         
-        # 创建共享价值网络
+        # Create shared value networks
         shared_value_networks = {}
         for protocol in args.protocols:
             state_dim = config['protocols'][protocol].get('state_dim', 1000)
@@ -83,7 +83,7 @@ def main():
                 action_dim=action_dim
             ).to(device)
         
-        # 创建智能体数组
+        # Create agent arrays
         agent_arrays = {}
         for protocol in args.protocols:
             protocol_config = config['protocols'][protocol]
@@ -94,7 +94,7 @@ def main():
                 device=device
             )
         
-        # 创建训练器
+        # Create trainer
         trainer = OmniFuzzTrainer(
             agent_arrays=agent_arrays,
             environment=environment,
@@ -102,24 +102,24 @@ def main():
             device=device
         )
         
-        logger.info("开始训练...")
+        logger.info("Start training...")
         
-        # 训练循环
+        # Training loop
         training_results = trainer.train(num_episodes=args.episodes)
         
-        logger.info("训练完成!")
+        logger.info("Training completed!")
         
-        # 保存模型
+        # Save models
         trainer.save_models('models/')
-        logger.info("模型已保存到 models/ 目录")
+        logger.info("Models saved to models/ directory")
         
-        # 输出训练结果
-        logger.info(f"最终奖励: {training_results['final_reward']:.4f}")
-        logger.info(f"发现的漏洞数量: {training_results['vulnerabilities_found']}")
-        logger.info(f"平均代码覆盖率: {training_results['avg_coverage']:.2f}%")
+        # Output training results
+        logger.info(f"Final reward: {training_results['final_reward']:.4f}")
+        logger.info(f"Vulnerabilities found: {training_results['vulnerabilities_found']}")
+        logger.info(f"Average code coverage: {training_results['avg_coverage']:.2f}%")
         
     except Exception as e:
-        logger.error(f"训练过程中发生错误: {e}")
+        logger.error(f"Error during training: {e}")
         raise
 
 if __name__ == "__main__":

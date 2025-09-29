@@ -13,7 +13,7 @@ from training.reward_calculator import RewardCalculator
 class TestIntegration(unittest.TestCase):
 
     def setUp(self):
-        """设置集成测试环境"""
+        """Set up integration test environment"""
         self.config = {
             'protocols': {
                 'modbus_tcp': {
@@ -45,11 +45,11 @@ class TestIntegration(unittest.TestCase):
         self.device = torch.device('cpu')
 
     def test_agent_environment_integration(self):
-        """测试智能体与环境集成"""
-        # 创建共享价值网络
+        """Test agent-environment integration"""
+        # Create shared value network
         shared_value_network = ValueNetwork(state_dim=10, action_dim=5)
         
-        # 创建智能体数组
+        # Create agent array
         agent_array = AgentArray(
             protocol_name='modbus_tcp',
             field_config=self.config['protocols']['modbus_tcp']['fields'],
@@ -57,21 +57,21 @@ class TestIntegration(unittest.TestCase):
             device=self.device
         )
         
-        # 创建环境
+        # Create environment
         environment = PowerIoTEnvironment(
             protocols=['modbus_tcp'],
             config=self.config
         )
         
-        # 测试环境重置
+        # Test environment reset
         observations = environment.reset()
         self.assertIn('modbus_tcp', observations)
         
-        # 测试动作选择
+        # Test action selection
         actions = agent_array.select_actions(observations['modbus_tcp'])
         self.assertIn('function_code', actions)
         
-        # 测试环境步骤
+        # Test environment step
         next_observations, reward, done, info = environment.step(
             {'modbus_tcp': actions}
         )
@@ -81,10 +81,10 @@ class TestIntegration(unittest.TestCase):
         self.assertIsInstance(info, dict)
 
     def test_reward_calculation_integration(self):
-        """测试奖励计算集成"""
+        """Test reward calculation integration"""
         reward_calculator = RewardCalculator(self.config)
         
-        # 模拟模糊测试结果
+        # Simulate fuzzing results
         fuzzing_results = {
             'vulnerabilities': [
                 {'severity': 'critical', 'type': 'buffer_overflow'},
@@ -100,9 +100,9 @@ class TestIntegration(unittest.TestCase):
         self.assertGreater(reward, 0)
 
     def test_training_loop_integration(self):
-        """测试训练循环集成"""
-        # 这个测试验证各个组件能否协同工作
-        # 在实际项目中，这里应该运行一个简化的训练循环
+        """Test training loop integration"""
+        # This test verifies components can work together
+        # In a real project, a simplified training loop should run here
         
         shared_value_network = ValueNetwork(state_dim=10, action_dim=5)
         
@@ -118,16 +118,16 @@ class TestIntegration(unittest.TestCase):
             config=self.config
         )
         
-        # 运行简化的训练步骤
+        # Run simplified training steps
         observations = environment.reset()
         
-        for step in range(10):  # 运行10步
+        for step in range(10):  # run 10 steps
             actions = agent_array.select_actions(observations['modbus_tcp'])
             next_observations, reward, done, info = environment.step(
                 {'modbus_tcp': actions}
             )
             
-            # 验证数据完整性
+            # Validate data integrity
             self.assertIsInstance(reward, float)
             self.assertIsInstance(done, bool)
             
@@ -136,8 +136,8 @@ class TestIntegration(unittest.TestCase):
             if done:
                 break
         
-        # 验证训练过程完成
-        self.assertTrue(True)  # 如果没有异常抛出，测试通过
+        # Verify training completes
+        self.assertTrue(True)  # Test passes if no exception is raised
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,7 @@
 """
-核心模块 - 多智能体强化学习核心组件
+Core module - multi-agent reinforcement learning core components
 
-包含智能体、网络、经验缓冲区等核心组件
+Includes agents, networks, and experience buffers
 """
 
 from .agent_array import AgentArray

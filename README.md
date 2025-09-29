@@ -6,105 +6,105 @@
 
 **A Multi-Agent Reinforcement Learning Framework for Protocol-Aware Fuzzing in Power IoT Devices**
 
-OmniFuzz是一个基于多智能体强化学习的电力物联网设备协议感知模糊测试框架，专门用于发现工业控制系统中协议实现的安全漏洞。
+OmniFuzz is a protocol-aware fuzzing framework for power IoT devices based on multi-agent reinforcement learning, designed to discover security vulnerabilities in protocol implementations of industrial control systems.
 
-## 🚀 特性
+## 🚀 Features
 
-- **🤖 多智能体强化学习**: 每个协议字段都有专用的智能体，协同工作发现漏洞
-- **🔌 多协议支持**: 支持Modbus TCP、EtherNet/IP、Siemens S7等主流工业协议
-- **🧬 智能变异策略**: 8种不同的变异操作，包括字段翻转、删除、复制等
-- **🎯 多目标奖励函数**: 综合考虑漏洞发现数量、路径深度、多样性等因素
-- **📊 完整评估体系**: 与8种基线方法进行性能比较
-- **📈 实时监控**: 资源使用和性能分析
-- **🔧 模块化设计**: 易于扩展和维护
+- **🤖 Multi-agent reinforcement learning**: A dedicated agent per protocol field collaborates to discover vulnerabilities
+- **🔌 Multi-protocol support**: Modbus TCP, EtherNet/IP, Siemens S7
+- **🧬 Intelligent mutation strategies**: 8 mutation operations including field flipping, deletion, duplication, and more
+- **🎯 Multi-objective reward**: Considers vulnerabilities found, path depth, diversity, etc.
+- **📊 Comprehensive evaluation**: Compared against 8 baseline methods
+- **📈 Real-time monitoring**: Resource usage and performance analysis
+- **🔧 Modular design**: Easy to extend and maintain
 
-## 📋 系统要求
+## 📋 System Requirements
 
 - Python 3.8+
 - PyTorch 1.9+
-- CUDA 11.0+ (可选，用于GPU加速)
+- CUDA 11.0+ (optional, for GPU acceleration)
 
-## 🛠️ 安装
+## 🛠️ Installation
 
-### 1. 克隆仓库
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/your-username/omnifuzz.git
 cd omnifuzz
 ```
 
-### 2. 创建虚拟环境
+### 2. Create a virtual environment
 
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# 或
+# or
 venv\Scripts\activate  # Windows
 ```
 
-### 3. 安装依赖
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. 安装OmniFuzz
+### 4. Install OmniFuzz
 
 ```bash
 pip install -e .
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 训练模型
+### Train models
 
 ```bash
-# 使用默认配置训练
+# Train with default config
 python scripts/train_omnifuzz.py
 
-# 指定协议和训练周期
+# Specify protocols and training episodes
 python scripts/train_omnifuzz.py --protocols modbus_tcp ethernet_ip --episodes 500
 
-# 使用GPU训练
+# Train on GPU
 python scripts/train_omnifuzz.py --device cuda
 ```
 
-### 运行模糊测试
+### Run fuzzing
 
 ```bash
-# 使用训练好的模型进行模糊测试
+# Fuzz with trained models
 python scripts/run_fuzzing.py --models_dir models/ --duration 3600
 
-# 指定输出目录
+# Specify output directory
 python scripts/run_fuzzing.py --output_dir results/ --protocols modbus_tcp siemens_s7
 ```
 
-### 性能评估
+### Performance evaluation
 
 ```bash
-# 与基线方法比较
+# Compare with baselines
 python scripts/evaluate_performance.py --baselines AFL AFL++ DeepFuzz
 
-# 生成详细报告
+# Generate detailed report
 python scripts/evaluate_performance.py --output_dir evaluation_results/
 ```
 
-## 📖 使用示例
+## 📖 Example Usage
 
-### Modbus TCP 示例
+### Modbus TCP Example
 
 ```python
 from src import PowerIoTEnvironment, AgentArray, ValueNetwork
 import torch
 
-# 创建环境
+# Create environment
 env = PowerIoTEnvironment(protocols=['modbus_tcp'], config=config)
 
-# 创建智能体
+# Create agents
 value_network = ValueNetwork(state_dim=100, action_dim=8)
 agent_array = AgentArray('modbus_tcp', field_config, value_network, device)
 
-# 运行测试
+# Run test
 observations = env.reset()
 for step in range(100):
     actions = agent_array.select_actions(observations['modbus_tcp'])
@@ -112,109 +112,109 @@ for step in range(100):
     observations = next_obs
 ```
 
-### 自定义变异策略
+### Custom mutation strategy
 
 ```python
 from src import MutationEngine, MutationAction
 
-# 创建变异引擎
+# Create mutation engine
 mutation_engine = MutationEngine(protocol_config)
 
-# 应用变异
+# Apply mutation
 mutated_message = mutation_engine.mutate_protocol_message(
-    original_message, 
+    original_message,
     {'function_code': MutationAction.FIELD_FLIPPING}
 )
 ```
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 OmniFuzz/
-├── README.md                 # 项目说明
-├── requirements.txt          # 依赖包列表
-├── setup.py                 # 安装配置
-├── config/                  # 配置文件
+├── README.md                 # Project description
+├── requirements.txt          # Dependencies
+├── setup.py                  # Installation config
+├── config/                   # Configuration files
 │   ├── default_config.yaml
 │   ├── reward_weights.yaml
 │   └── protocol_configs/
-├── src/                     # 源代码
-│   ├── core/               # 核心组件
-│   ├── environment/        # 环境模块
-│   ├── fuzzing/           # 模糊测试
-│   ├── training/           # 训练模块
-│   ├── utils/              # 工具模块
-│   └── evaluation/         # 评估模块
-├── scripts/                # 脚本文件
-├── tests/                  # 测试文件
-└── examples/               # 示例代码
+├── src/                      # Source code
+│   ├── core/                 # Core components
+│   ├── environment/          # Environment module
+│   ├── fuzzing/              # Fuzzing
+│   ├── training/             # Training
+│   ├── utils/                # Utilities
+│   └── evaluation/           # Evaluation
+├── scripts/                  # Scripts
+├── tests/                    # Tests
+└── examples/                 # Examples
 ```
 
-## 🔬 支持的协议
+## 🔬 Supported Protocols
 
-| 协议 | 端口 | 描述 | 状态 |
+| Protocol | Port | Description | Status |
 |------|------|------|------|
-| Modbus TCP | 502 | 工业自动化协议 | ✅ 完全支持 |
-| EtherNet/IP | 44818 | 工业以太网协议 | ✅ 完全支持 |
-| Siemens S7 | 102 | 西门子PLC协议 | ✅ 完全支持 |
+| Modbus TCP | 502 | Industrial automation protocol | ✅ Full support |
+| EtherNet/IP | 44818 | Industrial Ethernet protocol | ✅ Full support |
+| Siemens S7 | 102 | Siemens PLC protocol | ✅ Full support |
 
-## 🧪 变异策略
+## 🧪 Mutation Strategies
 
-- **字段翻转** (Field Flipping): 随机翻转字段中的位
-- **字段删除** (Field Deletion): 删除或置零字段
-- **字段复制** (Field Duplication): 复制字段内容
-- **字段截断** (Field Truncation): 截断消息长度
-- **字段填充** (Field Padding): 添加填充数据
-- **无效标志注入** (Invalid Flag Injection): 注入无效标志值
-- **字段重排序** (Fields Reordering): 重新排列字段顺序
-- **语义变异** (Semantic Mutation): 基于语义的智能变异
+- **Field Flipping**: Randomly flip bits in a field
+- **Field Deletion**: Delete or zero out a field
+- **Field Duplication**: Duplicate field content
+- **Field Truncation**: Truncate message length
+- **Field Padding**: Add padding data
+- **Invalid Flag Injection**: Inject invalid flag values
+- **Fields Reordering**: Reorder fields
+- **Semantic Mutation**: Semantics-aware mutation
 
-## 📊 性能指标
+## 📊 Metrics
 
-- **首次攻击时间** (Time to First Attack): 发现第一个漏洞的时间
-- **有效识别率** (Effective Recognition Rate): 成功识别的漏洞比例
-- **代码覆盖率** (Code Coverage): 执行路径的覆盖率
-- **漏洞多样性** (Vulnerability Diversity): 发现的不同类型漏洞数量
+- **Time to First Attack**: Time to discover the first vulnerability
+- **Effective Recognition Rate**: Ratio of successfully identified vulnerabilities
+- **Code Coverage**: Coverage of execution paths
+- **Vulnerability Diversity**: Number of distinct vulnerability types found
 
-## 🏆 基线比较
+## 🏆 Baselines
 
-OmniFuzz与以下基线方法进行了比较：
+OmniFuzz is compared with the following baselines:
 
-- **Sulley**: 传统模糊测试框架
-- **AFL/AFL++**: 基于覆盖率的模糊测试
-- **Peach**: 基于模型的模糊测试
-- **SeqFuzzer**: 序列感知模糊测试
-- **DeepFuzz**: 基于深度学习的模糊测试
-- **DQNFuzzer**: 基于DQN的模糊测试
-- **Q-Learning-Fuzzer**: 基于Q学习的模糊测试
+- **Sulley**: Traditional fuzzing framework
+- **AFL/AFL++**: Coverage-guided fuzzing
+- **Peach**: Model-based fuzzing
+- **SeqFuzzer**: Sequence-aware fuzzing
+- **DeepFuzz**: Deep learning based fuzzing
+- **DQNFuzzer**: DQN-based fuzzing
+- **Q-Learning-Fuzzer**: Q-learning based fuzzing
 
-## 🤝 贡献
+## 🤝 Contributing
 
-我们欢迎各种形式的贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详细信息。
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-### 开发环境设置
+### Developer setup
 
 ```bash
-# 安装开发依赖
+# Install dev dependencies
 pip install -r requirements-dev.txt
 
-# 运行测试
+# Run tests
 pytest tests/
 
-# 代码格式化
+# Format code
 black src/ tests/
 
-# 类型检查
+# Type check
 mypy src/
 ```
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
 
-## 📚 引用
+## 📚 Citation
 
-如果您在研究中使用了OmniFuzz，请引用我们的论文：
+If you use OmniFuzz in your research, please cite our paper:
 
 ```bibtex
 @article{song2024omnifuzz,
@@ -225,17 +225,17 @@ mypy src/
 }
 ```
 
-## 📞 联系方式
+## 📞 Contact
 
-- **作者**: Yubo Song, Weiwei Chen
-- **邮箱**: songyubo@seu.edu.cn
-- **项目主页**: https://github.com/your-username/omnifuzz
-- **问题反馈**: https://github.com/your-username/omnifuzz/issues
+- **Authors**: Yubo Song, Weiwei Chen
+- **Email**: songyubo@seu.edu.cn
+- **Project Home**: https://github.com/your-username/omnifuzz
+- **Issues**: https://github.com/your-username/omnifuzz/issues
 
-## 🙏 致谢
+## 🙏 Acknowledgements
 
-感谢所有为OmniFuzz项目做出贡献的开发者和研究人员。
+Thanks to all developers and researchers who contributed to OmniFuzz.
 
 ---
 
-**⚠️ 免责声明**: 本工具仅用于安全研究和授权的渗透测试。使用者需要确保遵守相关法律法规，不得用于非法用途。
+**⚠️ Disclaimer**: This tool is intended for security research and authorized penetration testing only. Users must comply with applicable laws and must not use it for illegal purposes.

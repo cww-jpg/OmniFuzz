@@ -6,7 +6,7 @@ import threading
 from datetime import datetime
 
 class ResourceMonitor:
-    """资源监控器"""
+    """Resource monitor"""
 
     def __init__(self, interval: float = 1.0):
         self.interval = interval
@@ -16,33 +16,33 @@ class ResourceMonitor:
         self.metrics_history = []
 
     def start_monitoring(self):
-        """开始监控"""
+        """Start monitoring"""
         if self.monitoring:
-            self.logger.warning("监控已在运行中")
+            self.logger.warning("Monitoring is already running")
             return
 
         self.monitoring = True
         self.monitor_thread = threading.Thread(target=self._monitor_loop)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
-        self.logger.info("资源监控已启动")
+        self.logger.info("Resource monitoring started")
 
     def stop_monitoring(self):
-        """停止监控"""
+        """Stop monitoring"""
         self.monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join(timeout=5.0)
-        self.logger.info("资源监控已停止")
+        self.logger.info("Resource monitoring stopped")
 
     def _monitor_loop(self):
-        """监控循环"""
+        """Monitoring loop"""
         while self.monitoring:
             metrics = self._collect_metrics()
             self.metrics_history.append(metrics)
             time.sleep(self.interval)
 
     def _collect_metrics(self) -> Dict[str, Any]:
-        """收集系统指标"""
+        """Collect system metrics"""
         return {
             'timestamp': datetime.now().isoformat(),
             'cpu_percent': psutil.cpu_percent(interval=None),
@@ -53,13 +53,13 @@ class ResourceMonitor:
         }
 
     def get_current_metrics(self) -> Dict[str, Any]:
-        """获取当前指标"""
+        """Get current metrics"""
         if self.metrics_history:
             return self.metrics_history[-1]
         return self._collect_metrics()
 
     def get_metrics_summary(self) -> Dict[str, Any]:
-        """获取指标摘要"""
+        """Get metrics summary"""
         if not self.metrics_history:
             return {}
 
@@ -76,28 +76,28 @@ class ResourceMonitor:
         }
 
     def generate_report(self) -> str:
-        """生成监控报告"""
+        """Generate monitoring report"""
         summary = self.get_metrics_summary()
 
         report = [
-            "资源监控报告",
+            "Resource Monitoring Report",
             "=" * 40,
-            f"监控时长: {summary.get('duration_seconds', 0):.1f} 秒",
-            f"CPU使用率 - 平均: {summary.get('cpu_avg', 0):.1f}%, 最大: {summary.get('cpu_max', 0):.1f}%",
-            f"内存使用率 - 平均: {summary.get('memory_avg', 0):.1f}%, 最大: {summary.get('memory_max', 0):.1f}%",
-            f"收集的指标数量: {summary.get('total_metrics', 0)}"
+            f"Duration: {summary.get('duration_seconds', 0):.1f} seconds",
+            f"CPU usage - avg: {summary.get('cpu_avg', 0):.1f}%, max: {summary.get('cpu_max', 0):.1f}%",
+            f"Memory usage - avg: {summary.get('memory_avg', 0):.1f}%, max: {summary.get('memory_max', 0):.1f}%",
+            f"Total metrics collected: {summary.get('total_metrics', 0)}"
         ]
 
         return "\n".join(report)
 
 class PerformanceProfiler:
-    """性能分析器"""
+    """Performance profiler"""
 
     def __init__(self):
         self.measurements = {}
 
     def start_timer(self, name: str):
-        """开始计时"""
+        """Start timing"""
         self.measurements[name] = {
             'start': time.time(),
             'end': None,
@@ -105,7 +105,7 @@ class PerformanceProfiler:
         }
 
     def stop_timer(self, name: str):
-        """停止计时"""
+        """Stop timing"""
         if name in self.measurements:
             self.measurements[name]['end'] = time.time()
             self.measurements[name]['duration'] = (
@@ -113,16 +113,16 @@ class PerformanceProfiler:
             )
 
     def get_duration(self, name: str) -> float:
-        """获取持续时间"""
+        """Get duration"""
         if name in self.measurements and self.measurements[name]['duration'] is not None:
             return self.measurements[name]['duration']
         return 0.0
 
     def print_profile_report(self):
-        """打印性能分析报告"""
-        print("性能分析报告")
+        """Print performance profile report"""
+        print("Performance Profile Report")
         print("=" * 50)
 
         for name, measurement in self.measurements.items():
             if measurement['duration'] is not None:
-                print(f"{name}: {measurement['duration']:.4f} 秒")
+                print(f"{name}: {measurement['duration']:.4f} s")
